@@ -1,0 +1,39 @@
+services:
+  dotnovi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+#    container_name: dotnovi_compose
+    environment:
+      - DATABASE_URL=postgresql://dotnovi:devops123@postgresql:5432/dotnovi
+    depends_on:
+      - postgresql
+    networks:
+      - isolated
+      - public
+    ports:
+      - "3000"
+    restart: unless-stopped
+
+  postgresql:
+    build:
+      context: .
+      dockerfile: Dockerfile.psql
+    container_name: postgresql
+    environment:
+      - POSTGRES_USER=dotnovi
+      - POSTGRES_PASSWORD=devops123
+      - POSTGRES_DB=dotnovi
+    volumes:
+      - pgdata:/var/lib/postgresql
+    networks:
+      - isolated
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  
+networks:
+  isolated:
+    internal: true
+  public:
