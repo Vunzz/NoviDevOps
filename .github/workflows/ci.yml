@@ -56,5 +56,5 @@ jobs:
     
     # Matrix strategy
     strategy:
-    matrix:
-    node-version: [18, 20]
+      matrix:
+        node-version: [18, 20]
