@@ -1,4 +1,4 @@
-name: Workflow Name
+name: Mijn eerste workflow
 
 on:                              # Trigger events
   push:
