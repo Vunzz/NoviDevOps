@@ -1,0 +1,24 @@
+name: Workflow Name
+
+on:                              # Trigger events
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 0 * * *'          # Daily at midnight
+
+jobs:
+  job-name:                       # Job definition
+    runs-on: ubuntu-latest        # Runner
+
+    steps:
+      - name: Step 1              # Step definition
+        uses: action@v1           # Reusable action
+        with:                      # Input parameters
+          param: value
+
+      - name: Step 2
+        run: npm test             # Inline command
+        env:                       # Environment vars
+          NODE_ENV: test
