@@ -1,5 +1,7 @@
 import { jest } from '@jest/globals';
 
+const { healthCheck } = await import('../src/db.js');
+
 jest.unstable_mockModule('../src/db.js', () => ({
   default: null,
   query: jest.fn(),
@@ -50,4 +52,37 @@ describe('Health Check Endpoint', () => {
       expect(response.body.uptime).toBeGreaterThan(0);
     });
   });
+
+  escribe('New health endpoints', () => {
+ beforeEach(() => {
+ healthCheck.mockReset();
+ healthCheck.mockResolvedValue(true);
+ });
+ it('liveness works without PostgreSQL', async () => {
+ healthCheck.mockResolvedValue(false);
+ const response = await request(app).get('/health/live').expect(200);
+ expect(response.body.status).toBe('alive');
+ expect(healthCheck).not.toHaveBeenCalled();
+ });
+ it('readiness is 200 when PostgreSQL works', async () => {
+ const response = await request(app).get('/health/ready').expect(200);
+ expect(response.body.database).toBe('connected');
+ });
+ it('readiness is 503 when PostgreSQL fails', async () => {
+ healthCheck.mockResolvedValue(false);
+ const response = await request(app).get('/health/ready').expect(503);
+ expect(response.body.database).toBe('disconnected');
+ });
+ it('does not expose internal error messages', async () => {
+ healthCheck.mockRejectedValue(new Error('Secret database error'));
+ const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+ try {
+ const response = await request(app).get('/health/ready').expect(503);
+ expect(JSON.stringify(response.body)).not.toContain('Secret database 
+error');
+ } finally {
+ spy.mockRestore();
+ }
+ });
+});
 });
